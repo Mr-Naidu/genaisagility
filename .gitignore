@@ -7,15 +7,17 @@ ENV/
 env.bak/
 venv.bak/
 
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
 
-# IDEs
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# VS Code
 .vscode/
-.idea/
 
-# OS generated files
+# MacOS
 .DS_Store
-Thumbs.db
