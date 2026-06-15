@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Email Assistant</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Email Assistant</h1>
+            <p>Powered by Gen-AI to classify and rewrite your emails instantly.</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('classify')">Classify</button>
+            <button class="tab-btn" onclick="switchTab('rewrite')">Rewrite</button>
+        </div>
+
+        <!-- Classify Form -->
+        <div id="classify-section">
+            <div class="form-group">
+                <label for="classify-content">Email Content</label>
+                <textarea id="classify-content" placeholder="Paste the email here to find out if it's Work, Personal, Finance, or Spam..."></textarea>
+            </div>
+            <button class="submit-btn" onclick="classifyEmail()" id="classify-btn">
+                <span>Analyze Email</span>
+                <div class="loader" id="classify-loader"></div>
+            </button>
+        </div>
+
+        <!-- Rewrite Form -->
+        <div id="rewrite-section" class="hidden">
+            <div class="form-group">
+                <label for="rewrite-content">Email Content</label>
+                <textarea id="rewrite-content" placeholder="Paste the email you want to rewrite..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="tone-select">Desired Tone</label>
+                <select id="tone-select">
+                    <option value="Professional">Professional</option>
+                    <option value="Friendly">Friendly</option>
+                    <option value="Formal">Formal</option>
+                    <option value="Casual">Casual</option>
+                </select>
+            </div>
+            <button class="submit-btn" onclick="rewriteEmail()" id="rewrite-btn">
+                <span>Rewrite Email</span>
+                <div class="loader" id="rewrite-loader"></div>
+            </button>
+        </div>
+
+        <!-- Results -->
+        <div class="result-container" id="result-box">
+            <div class="result-title" id="result-title">Result</div>
+            <div class="result-content" id="result-content"></div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
