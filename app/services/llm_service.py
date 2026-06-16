@@ -1,6 +1,6 @@
 import json
 import time
-import google.generativeai as genai
+from groq import Groq
 from app.core.config import get_settings
 from app.core.logging import logger
 from app.models.schemas import ClassifyResponse, RewriteResponse
@@ -13,51 +13,59 @@ from app.prompts.templates import (
 
 settings = get_settings()
 
-# Initialize Gemini API if key is available
-if settings.GEMINI_API_KEY:
-    genai.configure(api_key=settings.GEMINI_API_KEY)
+# Initialize Groq client
+client = None
+if settings.GROQ_API_KEY:
+    client = Groq(api_key=settings.GROQ_API_KEY)
 
-# Use gemini-2.0-flash-lite — higher free-tier rate limit (30 req/min vs 5)
-MODEL_NAME = "gemini-2.0-flash-lite"
+# Using Llama-3-8b-8192 which is extremely fast and free on Groq
+MODEL_NAME = "llama3-8b-8192"
 
 # Retry settings for rate limit errors
 MAX_RETRIES = 3
-BASE_WAIT_SECONDS = 10
+BASE_WAIT_SECONDS = 5
 
-def _call_with_retry(model, prompt: str) -> str:
-    """Calls Gemini with automatic retry on rate limit (429) errors."""
+def _call_with_retry(system_prompt: str, user_prompt: str) -> str:
+    """Calls Groq with automatic retry on rate limit (429) errors."""
+    if not client:
+        raise ValueError("GROQ_API_KEY is not set.")
+        
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            response = model.generate_content(prompt)
-            return response.text
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": system_prompt,
+                    },
+                    {
+                        "role": "user",
+                        "content": user_prompt,
+                    }
+                ],
+                model=MODEL_NAME,
+                response_format={"type": "json_object"},
+            )
+            return chat_completion.choices[0].message.content
         except Exception as e:
             error_msg = str(e)
-            if "429" in error_msg or "quota" in error_msg.lower():
-                wait_time = BASE_WAIT_SECONDS * attempt  # 10s, 20s, 30s
+            if "429" in error_msg or "rate limit" in error_msg.lower():
+                wait_time = BASE_WAIT_SECONDS * attempt
                 logger.warning(
                     f"Rate limit hit (attempt {attempt}/{MAX_RETRIES}). "
                     f"Retrying in {wait_time}s..."
                 )
                 time.sleep(wait_time)
             else:
-                raise  # Not a rate limit error, raise immediately
+                raise
     raise ValueError(
         "Rate limit exceeded after multiple retries. "
         "Please wait a moment and try again."
     )
 
 async def classify_email_with_llm(email_content: str) -> ClassifyResponse:
-    if not settings.GEMINI_API_KEY:
-        raise ValueError("GEMINI_API_KEY is not set.")
-    
-    model = genai.GenerativeModel(
-        model_name=MODEL_NAME,
-        system_instruction=CLASSIFY_EMAIL_SYSTEM_PROMPT,
-        generation_config={"response_mime_type": "application/json"}
-    )
-    
     prompt = get_classify_prompt(email_content)
-    response_text = _call_with_retry(model, prompt)
+    response_text = _call_with_retry(CLASSIFY_EMAIL_SYSTEM_PROMPT, prompt)
     
     try:
         data = json.loads(response_text)
@@ -66,17 +74,8 @@ async def classify_email_with_llm(email_content: str) -> ClassifyResponse:
         raise ValueError("LLM returned invalid JSON.")
 
 async def rewrite_email_with_llm(email_content: str, desired_tone: str) -> RewriteResponse:
-    if not settings.GEMINI_API_KEY:
-        raise ValueError("GEMINI_API_KEY is not set.")
-        
-    model = genai.GenerativeModel(
-        model_name=MODEL_NAME,
-        system_instruction=REWRITE_EMAIL_SYSTEM_PROMPT,
-        generation_config={"response_mime_type": "application/json"}
-    )
-    
     prompt = get_rewrite_prompt(email_content, desired_tone)
-    response_text = _call_with_retry(model, prompt)
+    response_text = _call_with_retry(REWRITE_EMAIL_SYSTEM_PROMPT, prompt)
     
     try:
         data = json.loads(response_text)

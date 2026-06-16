@@ -1,6 +1,6 @@
 # Smart Email Classifier & Rewriter
 
-This is a FastAPI-based microservice that leverages Generative AI (Google Gemini 2.5 Flash) to classify and rewrite emails.
+This is a FastAPI-based microservice that leverages Generative AI (Groq Llama 3) to classify and rewrite emails.
 
 ## Features
 
@@ -15,7 +15,7 @@ This project follows an industry-standard layout:
 *   `app/api/endpoints.py`: API route definitions.
 *   `app/core/config.py`: Environment and configuration management.
 *   `app/models/schemas.py`: Pydantic data validation schemas.
-*   `app/services/llm_service.py`: Integration with the Gemini API.
+*   `app/services/llm_service.py`: Integration with the Groq API.
 *   `app/prompts/templates.py`: Prompt templates for Gen-AI models.
 
 ## Setup Instructions
@@ -34,7 +34,7 @@ This project follows an industry-standard layout:
 4.  **Configure Environment Variables**:
     Create a `.env` file in the root directory (you can use the provided template or just add the key directly):
     ```env
-    GEMINI_API_KEY=your_actual_api_key_here
+    GROQ_API_KEY=your_actual_api_key_here
     ```
 5.  **Run the application**:
     ```bash
