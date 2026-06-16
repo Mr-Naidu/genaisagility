@@ -1,6 +1,6 @@
 # Smart Email Classifier & Rewriter
 
-This is a FastAPI-based microservice that leverages Generative AI (Google Gemini 1.5 Flash) to classify and rewrite emails.
+This is a FastAPI-based microservice that leverages Generative AI (Google Gemini 2.5 Flash) to classify and rewrite emails.
 
 ## Features
 
