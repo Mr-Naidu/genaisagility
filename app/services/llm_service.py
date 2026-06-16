@@ -19,7 +19,7 @@ if settings.GROQ_API_KEY:
     client = Groq(api_key=settings.GROQ_API_KEY)
 
 # Using Llama-3-8b-8192 which is extremely fast and free on Groq
-MODEL_NAME = "llama3-8b-8192"
+MODEL_NAME = "llama-3.3-70b-versatile"
 
 # Retry settings for rate limit errors
 MAX_RETRIES = 3
